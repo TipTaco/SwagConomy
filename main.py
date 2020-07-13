@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
-from discord.ext.commands import Bot
+
+import sql_db
 
 import os
 from dotenv import load_dotenv
@@ -28,12 +29,8 @@ trusted_users = [USER_TIPTACO]
 # The user to DM (if needed)
 the_true_boy = USER_TIPTACO
 
-
-@bot.command(name='balance', aliases=['bal', 'b'])
-async def _balance(ctx, *args):
-    if not check(ctx): return
-    print("Received command BALANCE from", ctx.message.author)
-    await ctx.send('Balance of ' + str(disp_name(ctx.author)) + ' is 0')
+database = "sql_currency.db"
+conn = sql_db.create_conn(database)
 
 
 def check_channel(ctx):
@@ -59,6 +56,44 @@ def disp_name(user):
             return str(user.name)
     elif isinstance(user, discord.User):
         return str(user.name)
+
+
+@bot.command(name='initialise', aliases=['init'])
+async def _init(ctx, *args):
+    if not check_channel(ctx): return
+
+    sql_db.safe_add_entry(conn, ctx.author.id, ctx.guild.id)
+
+    print("Received command INITIALISE from", ctx.message.author)
+    await ctx.send('Initialised ' + str(disp_name(ctx.author)))
+
+
+@bot.command(name='balance', aliases=['bal', 'b'])
+async def _balance(ctx, *args):
+    if not check_channel(ctx): return
+    print("Received command BALANCE from", ctx.message.author)
+
+    bal = sql_db.select_entry(conn, ctx.author.id, ctx.guild.id)
+
+    await ctx.send('Balance of ' + str(disp_name(ctx.author)) + ' is ' + str(bal))
+
+
+@bot.command(name='add', aliases=['a'])
+@commands.has_role('King')
+async def _add(ctx, *args):
+    if not check_channel(ctx): return
+    if len(args) <= 0: return
+    print("Received command ADD from", ctx.message.author)
+
+    sql_db.update_entry(conn, ctx.author.id, ctx.guild.id, int(args[0]))
+
+    await ctx.send('Added balance of ' + str(args[0]) + ' to ' + str(disp_name(ctx.author)))
+
+
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.errors.CheckFailure):
+        await ctx.send('You do not have the correct role for this command.')
 
 
 @bot.event
