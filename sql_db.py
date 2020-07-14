@@ -24,7 +24,7 @@ def create_table(conn, create_table_sql):
         print(e)
 
 
-def add_entry(conn, user_id, guild_id, balance=0):
+def add_entry(conn, user_id, guild_id, balance=0.0):
 
     sql = """ INSERT INTO wallet(user_id,guild_id,balance)
                 VALUES(?,?,?)"""
@@ -36,7 +36,7 @@ def add_entry(conn, user_id, guild_id, balance=0):
     return cur.lastrowid
 
 
-def update_entry(conn, user_id, guild_id, diff=0):
+def update_entry(conn, user_id, guild_id, diff=0.0):
     sql = """ UPDATE wallet
                 SET balance = balance + ?
                 WHERE user_id = ? 
@@ -59,7 +59,7 @@ def select_entry(conn, user_id, guild_id):
     balance = 0
 
     if len(rows) > 0:
-        balance = rows[0][2]
+        balance = rows[0]
 
     return balance
 
@@ -75,6 +75,18 @@ def has_entry(conn, user_id, guild_id):
 def safe_add_entry(conn, user_id, guild_id):
     if not has_entry(conn, user_id, guild_id):
         add_entry(conn, user_id, guild_id)
+
+
+def select_entry_sorted(conn, guild_id):
+    sql = """SELECT * FROM wallet
+                WHERE guild_id = ?
+                ORDER BY balance DESC;"""
+
+    cur = conn.cursor()
+    cur.execute(sql, (guild_id, ))
+    rows = cur.fetchall()
+
+    return rows
 
 
 def main():
