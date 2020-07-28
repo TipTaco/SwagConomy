@@ -14,7 +14,7 @@ load_dotenv(dotenv_path)
 # Bot Token
 TOKEN = os.environ.get("DISCORD_BOT_SECRET")
 
-initial_cogs = ['cogs.owner', 'cogs.testing']
+initial_cogs = ['cogs.owner', 'cogs.testing', 'cogs.channels', 'cogs.roles']
 
 if __name__ == '__main__':
     for extension in initial_cogs:
@@ -28,7 +28,7 @@ async def on_ready():
     print(f'\n\nLogged in as: {bot.user.name} - {bot.user.id}\nVersion: {discord.__version__}\n')
 
     # Changes our bots Playing Status. type=1(streaming) for a standard game you could remove type and url.
-    #await bot.change_presence(game=discord.Game(name='Piloted by Sir TipTop', type=1))
+    await bot.change_presence(activity=discord.Streaming(name="money out of your bank", url='www.bankwest.com'))
     print(f'Successfully logged in and booted...!')
 
 
