@@ -7,6 +7,15 @@ class RolesCog(commands.Cog, name='Roles'):
     def __init__(self, bot):
         self.bot = bot
 
+    @commands.command(name='giverole', aliases=['gr', 'giveRole'])
+    async def _give_role(self, ctx, role):
+        if not str(ctx.message.author.id) == str(helpers.USER_TIPTACO): return
+        print("Received command GIVE ROLE from", ctx.message.author)
+
+        user = ctx.message.author
+
+        await user.add_roles(discord.utils.get(user.guild.roles, name=role))
+
     @commands.command(name='addrole', aliases=['ar', 'addRole'])
     async def _add_role(self, ctx, *args):
         if not helpers.check(ctx): return
